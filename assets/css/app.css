@@ -1,0 +1,9 @@
+.card-img-top{
+    height: 225px;
+    width: 100%;
+    display: block;
+}
+.jumbotron{
+    margin-bottom: 0px;
+    background-color: black;
+}
