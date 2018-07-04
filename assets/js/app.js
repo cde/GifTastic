@@ -1,5 +1,6 @@
 function parseResponse(response){
     var results = response.data;
+    console.log(results);
     var $giphysView = $('.giphys');
     $giphysView.empty(); // erasing anything in this div id so that it doesnt keep any from the previous click
 
@@ -19,6 +20,7 @@ function parseResponse(response){
         card.append(gifImage);
         var carBody = $('<div class="card-body">')
         carBody.append('<p class="card-text">' + results[i].title + '</p>')
+        carBody.append('<p><strong>Rating: </strong>' + results[i].rating + '</p>')
         card.append(carBody);   
         col.append(card);
         $giphysView.prepend(col)
