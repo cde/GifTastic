@@ -18,16 +18,22 @@
     <main role="main">
         <section class="jumbotron">
           <div class="container">
-            <h1 class="jumbotron-heading">Gif Tactic</h1>
+            <h1 class="jumbotron-heading text-white-50">Gif Tactic</h1>
             <nav class="navbar navbar-light">
-                    <a class="navbar-brand">Topics</a>
-                    <form class="form-inline">
-                        <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
-                        <button type="submit" class="btn btn-outline-success" id="add-search">
-                            <i class="fa fa-search"></i> Search
-                        </button>
-
-                    </form>
+                <a class="navbar-brand">Topics</a>
+                <form class="form-inline">
+                    <select class="custom-select rating" id="inputGroupSelect01">
+                        <option selected>Choose rating...</option>
+                        <option value="G">G</option>
+                        <option value="PG">PG</option>
+                        <option value="PG-13">PG-13</option>
+                        <option value="R">R</option>
+                      </select>  
+                    <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+                    <button type="submit" class="btn btn-outline-success" id="add-search">
+                        <i class="fa fa-search"></i>
+                    </button>
+                </form>
             </nav>
             <div class ="row">
                 <div class="col-sm-12 mt-4 topics">
@@ -35,7 +41,6 @@
             </div>
           </div>
         </section>
-  
         <div class="py-5 bg-light">
           <div class="container">
             <div class="row giphys">
@@ -48,7 +53,6 @@
                       <div class="btn-group">
                         <a type="button" class="btn btn-sm btn-outline-secondary">View</a>
                       </div>
-
                     </div>
                   </div>
                 </div>

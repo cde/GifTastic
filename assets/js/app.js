@@ -1,55 +1,103 @@
-function parseResponse(response){
-    var results = response.data;
-    console.log(results);
-    var $giphysView = $('.giphys');
-    $giphysView.empty(); // erasing anything in this div id so that it doesnt keep any from the previous click
-
-    if (results == ""){
-      $giphysView.append("<p>There isn't a gif for this selected button</>");
+class Topic {
+    constructor(topics) {
+        this.names = topics;
     }
-    for (var i = 0; i < results.length; i++) {
-        var col = $('<div class="col-md-4">')
-        var card = $('<div class="card mb-4 box-shadow">');
-        var gifImage = $("<img>");
-        gifImage.addClass('card-img-top image')
-        gifImage.attr("src", results[i].images.fixed_height_small_still.url); // still image stored into src of image
-        gifImage.attr("data-still",results[i].images.fixed_height_small_still.url); // still image
-        gifImage.attr("data-animate",results[i].images.fixed_height_small.url); // animated image
-        gifImage.attr("data-state", "still"); // set the image state
-        gifImage.addClass("image");
-        card.append(gifImage);
-        var carBody = $('<div class="card-body">')
-        carBody.append('<p class="card-text">' + results[i].title + '</p>')
-        carBody.append('<p><strong>Rating: </strong>' + results[i].rating + '</p>')
-        card.append(carBody);   
-        col.append(card);
-        $giphysView.prepend(col)
+    contains(topics) {
+        return topics.every((topic) => this.names.indexOf(topic) !== -1);
+    }
+    add(topic) {
+        if(!this.contains([topic])){
+            this.names.push(topic)        
+        }
     }
 }
-    
-function buildButtons (){
-    var $topicsDiv = $('.topics')
-    $topicsDiv.empty(); // erasing anything in this div id so that it doesnt duplicate the results
+var topics = new Topic(['soccer', 'tennis', 'rugby', 'baskeball', 'football', 'cycling', 'golf', 'gymnastics', 'fishing', 'hunting']);
 
-    topics.forEach(function(topic){
-        var $button = $('<button type="button" class="btn btn-info mr-4 mb-1 topic">')
-        $button.attr('data-topic', topic);
-        $button.text(topic);
-        $topicsDiv.append($button);
-    });
-}
-
-var topics = ['soccer', 'tennis', 'rugby', 'baskeball', 'football', 'cycling', 'golf', 'gymnastics', 'fishing', 'hunting']
 var giphy = {
     apiKey: 'fGkQ1WcO0HJOJ3nyp6c2GiLqx6c1yGPt',
     urlSearch: 'http://api.giphy.com/v1/gifs/search?',
+    limit: '10',
     search: function(query){
-        var queryURL = this.urlSearch + "q=" + query + "&api_key=" + this.apiKey + "&limit=10";
+        
+        var rating = $(".rating").val();
+        if(rating === "Choose rating..."){
+            rating = "G"
+        }
+        var queryURL = this.urlSearch + "q=" + query + "&api_key=" + this.apiKey + "&limit=10&rating=" + rating;
         var xhr = $.get(queryURL);
         xhr.done(function(response) { 
             parseResponse(response)
         });
     },
+}
+
+class Card {
+    constructor(gif) {
+        this.images = gif.images
+        this.title = gif.title
+        this.rating = gif.rating.toUpperCase()
+    }
+    createDiv(){
+        var  $card = $("<div>").addClass('card mb-4 box-shadow');
+        var img = $("<img>", {
+            class: "card-img-top image",
+            src: this.images.fixed_height_small_still.url,
+            "data-still": this.images.fixed_height_small_still.url,
+            "data-animate": this.images.fixed_height_small.url,
+            "data-state": "still"
+        })
+        var carBody = $("<div>").addClass("card-body")
+        var title = $("<h3>").text(this.title)
+        var rating = $("<p>", {
+            class: "card-text text-secondary",
+            text: "Rating: " + this.rating
+        })
+        carBody.append(title)
+        carBody.append(rating)
+        $card.append(img)
+        $card.append(carBody)
+        return $card
+    }
+
+}
+
+function parseResponse(response){
+    var results = response.data;
+    var $giphysView = $('.giphys');
+    $giphysView.empty(); // erasing anything in this div id so that it doesnt keep any from the previous click
+
+    if (results == ""){
+      $giphysView.append("<p class='text-danger'>There are not gifs for this selected button</>");
+    }
+    for (var i = 0; i < results.length; i++) {
+        var $col = $('<div class="col-md-4">');
+        var cardObj = new Card(results[i]);
+        $col.append(cardObj.createDiv());
+        $giphysView.prepend($col)
+    }
+}
+    
+function buildButtons (){
+    var $topicsDiv = $('.topics')
+    $topicsDiv.empty();
+
+    topics.names.forEach(function(topic){
+        var $button = $('<button type="button" class="btn btn-success mr-2 mb-1 topic">')
+        $button.attr('data-topic', topic);
+        $button.text(topic);
+        $topicsDiv.append($button);
+    });
+}
+function animateGif(img){
+    var $img = $(img);
+    var state = $img.attr('data-state');
+    if ( state == 'still'){
+        $img.attr('src', $img.data('animate'));
+        $img.attr('data-state', 'animate');
+    }else{
+        $img.attr('src', $img.data('still'));
+        $img.attr('data-state', 'still');
+    }
 }
 
 $(document).ready(function() {
@@ -61,27 +109,21 @@ $(document).ready(function() {
     })
 
     $(document).on("click", ".image", function(){
-        var state = $(this).attr('data-state');
-        if ( state == 'still'){
-            $(this).attr('src', $(this).data('animate'));
-            $(this).attr('data-state', 'animate');
-        }else{
-            $(this).attr('src', $(this).data('still'));
-            $(this).attr('data-state', 'still');
-        }
+        animateGif($(this));
     });
 
     $("#add-search").on("click", function(e) {
         e.preventDefault();
+
         var topic = $('input').val().trim()
         if(topic == "") {
             return false;
         }
-        topics.push(topic);
+        topics.add(topic);
         buildButtons();
         giphy.search(topic);
+
         $('input').val("")
         return false;
     })
-
   });
